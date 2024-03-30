@@ -3,20 +3,17 @@ import pandas as pd
 import folium
 import numpy as np
 from geopy.geocoders import ArcGIS
-from datetime import datetime as dt
 import geopandas as gpd
 from branca.colormap import LinearColormap
-from folium.features import GeoJsonTooltip
 from folium.features import GeoJsonPopup
 import branca
-
+from flask import Flask
+from flask import Flask, render_template
 
 import arcgis
 import arcgis.geoanalytics
 from arcgis.gis import GIS
-from arcgis.geoanalytics.summarize_data import describe_dataset, aggregate_points
-from arcgis.geoanalytics.analyze_patterns import calculate_density, find_hot_spots
-from arcgis.geoanalytics.manage_data import clip_layer, run_python_script
+
 
 
 #dataframes
@@ -82,4 +79,12 @@ popup = folium.GeoJsonPopup(
 folium.LayerControl().add_to(cr)
 
 cr
+#converts folium map to an HTML object
 
+html_map = cr._repr_html_()  
+app = Flask(__name__)
+@app.route("/")
+def index():
+    return render_template("index.html", map=html_map)
+if __name__ == "__main__":
+    app.run(host='127.0.0.1', port=8080, debug=True)

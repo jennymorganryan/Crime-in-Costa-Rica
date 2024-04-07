@@ -17,12 +17,12 @@ from arcgis.gis import GIS
 
 
 #dataframes
-one = pd.read_excel('../crimencr/estadsticaspoliciales2021.xls')
-two = pd.read_excel('../crimencr/estadsticaspoliciales2022.xlsx')
-three = pd.read_excel('../crimencr/estadsticaspoliciales2023.xlsx')
-four = pd.read_excel('../crimencr/estadsticaspoliciales2024.xls')
+one = pd.read_excel('../cr_crimen/estadsticaspoliciales2021.xls')
+two = pd.read_excel('../cr_crimen/estadsticaspoliciales2022.xlsx')
+three = pd.read_excel('../cr_crimen/estadsticaspoliciales2023.xlsx')
+four = pd.read_excel('../cr_crimen/estadsticaspoliciales2024.xls')
 df = pd.concat([one, two, three, four]) # raw crime info data frames
-polygon_districts = gpd.read_file('../crimencr/Distritos_de_Costa_Rica.geojson') #polygon lat. & long. coordinates for each district in CR
+polygon_districts = gpd.read_file('../cr_crimen/Distritos_de_Costa_Rica.geojson') #polygon lat. & long. coordinates for each district in CR
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') # dataframe with amount of crimes in each district grouped by type of crime
 total_crime_count = crime_count.groupby('Distrito')['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021') # dataframe with the total amount of crimes in each district
 one_total = one.groupby('Distrito').size().reset_index(name='Delitos Total 2021') # dataframe with the total amount of crimes in 2021

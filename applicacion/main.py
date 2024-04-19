@@ -11,18 +11,21 @@ from arcgis.gis import GIS
 import requests
 
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
+# Define URLs for the Excel files and GeoJSON data
+urls = {
+    "one": "https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=0",
+    "two": "https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=0",
+    "three": "https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=0",
+    "four": "https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=0",
+    "polygon_districts": "https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0"
+}
 
-#requests to get data and conversion to dataframe
-one_data= requests.get("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=0").json()
-one = geopandas.GeoDataFrame.from_features(one_data, crs="EPSG:5367")
-two_data = requests.get("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=0").json()
-two = geopandas.GeoDataFrame.from_features(two_data, crs="EPSG:5367")
-three_data = requests.get("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=0").json()
-three = geopandas.GeoDataFrame.from_features(three_data, crs="EPSG:5367")
-four_data = requests.get("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=0").json()
-four = geopandas.GeoDataFrame.from_features(four_data, crs="EPSG:5367")
-polygon_districts_data = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0")
-polygon_districts= geopandas.GeoDataFrame.from_features(polygon_districts_data, crs="EPSG:5367")
+# Read Excel files and GeoJSON data
+one = pd.read_excel(urls["one"])
+two = pd.read_excel(urls["two"])
+three = pd.read_excel(urls["three"])
+four = pd.read_excel(urls["four"])
+polygon_districts = gpd.read_file(urls["polygon_districts"])
 
  # concat of crime data for 2021-2024
 df = pd.concat([one, two, three, four])

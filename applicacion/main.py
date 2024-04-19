@@ -71,7 +71,7 @@ gj=folium.GeoJson(
 ).add_to(cr)
 popup = folium.GeoJsonPopup(
     name="Crime",
-    fields=["NOM_DIST", "Crime total from 2021", "Delitos Total 2021", "Delitos Total 2022", "Delitos Total 2023"],
+    fields=["NOM_DIST", "Crimen total desde 2021", "Delitos Total 2021", "Delitos Total 2022", "Delitos Total 2023"],
     aliases=["District:", "Total Crime 2021-March 2024", '2021 Total Crime', '2022 Total Crime', '2023 Total Crime'],
     localize=True,
     labels=True,

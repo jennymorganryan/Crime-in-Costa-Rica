@@ -11,15 +11,15 @@ from arcgis.gis import GIS
 
 
 #dataframes
-one = pd.read_excel('../../estadsticaspoliciales2021.xls')
-two = pd.read_excel('../../estadsticaspoliciales2022.xlsx')
-three = pd.read_excel('../../estadsticaspoliciales2023.xlsx')
-four = pd.read_excel('../../estadsticaspoliciales2024.xls')
+one = pd.read_excel('estadsticaspoliciales2021.xls')
+two = pd.read_excel('estadsticaspoliciales2022.xlsx')
+three = pd.read_excel('estadsticaspoliciales2023.xlsx')
+four = pd.read_excel('estadsticaspoliciales2024.xls')
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
  # raw crime info data frames
 df = pd.concat([one, two, three, four])
  #polygon lat. & long. coordinates for each district in CR
-polygon_districts = gpd.read_file('../../Distritos_de_Costa_Rica.geojson')
+polygon_districts = gpd.read_file('Distritos_de_Costa_Rica.geojson')
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district

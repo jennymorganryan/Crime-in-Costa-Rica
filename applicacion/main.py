@@ -1,27 +1,29 @@
 import pandas as pd
 import folium
+import geopandas
 import geopandas as gpd
 import branca
 from flask import Flask
 from flask import Flask, render_template
-
 import arcgis
 import arcgis.geoanalytics
 from arcgis.gis import GIS
-import gunicorn
+import requests
 
-
-
-#dataframes
-one = pd.read_excel('estadsticaspoliciales2021.xls')
-two = pd.read_excel('estadsticaspoliciales2022.xlsx')
-three = pd.read_excel('estadsticaspoliciales2023.xlsx')
-four = pd.read_excel('estadsticaspoliciales2024.xls')
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
- # raw crime info data frames
+
+#requests to get data and conversion to dataframe
+one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=0")
+two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=0")
+three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=0")
+four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=0")
+ # concat of crime data for 2021-2024
 df = pd.concat([one, two, three, four])
- #polygon lat. & long. coordinates for each district in CR
-polygon_districts = gpd.read_file('Distritos_de_Costa_Rica.geojson')
+
+#request to get geojson data and conversion to a dataframe
+polygon_districts_data = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0")
+polygon_districts= geopandas.GeoDataFrame.from_features(polygon_districts_data, crs="EPSG:5367")
+
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district

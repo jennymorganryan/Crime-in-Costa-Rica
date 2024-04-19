@@ -11,3 +11,4 @@ geopy==2.4.1
 geopandas==0.14.3
 branca==0.7.1
 arcgis==2.2.0.3
+xlrd==2.0.1

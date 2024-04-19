@@ -21,10 +21,10 @@ urls = {
 }
 
 # Read Excel files and GeoJSON data
-one = pd.read_excel(urls["one"])
-two = pd.read_excel(urls["two"])
-three = pd.read_excel(urls["three"])
-four = pd.read_excel(urls["four"])
+one = pd.read_excel(urls["one"], engine="xlrd")
+two = pd.read_excel(urls["two"], engine="openpyxl")
+three = pd.read_excel(urls["three"], engine="openpyxl")
+four = pd.read_excel(urls["four"], engine="xlrd")
 polygon_districts = gpd.read_file(urls["polygon_districts"])
 
  # concat of crime data for 2021-2024

@@ -21,10 +21,19 @@ four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estad
 # Concatenate DataFrames
 df = pd.concat([one, two, three, four])
 
-polygon_districts_data = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0&dl=1")
-polygon_districts= geopandas.GeoDataFrame.from_features(polygon_districts_data, crs="EPSG:5367")
+# Fetch GeoJSON data from Dropbox
+response = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0?dl=1")
 
+# Check if request was successful
+if response.status_code == 200:
+    # Extract GeoJSON content from response
+    geojson_content = response.json()
 
+    # Create GeoDataFrame from GeoJSON features
+    polygon_districts = geopandas.GeoDataFrame.from_features(geojson_content, crs="EPSG:5367")
+else:
+    print("Failed to fetch GeoJSON data")
+    
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district

@@ -53,7 +53,10 @@ except Exception:
             print(fh.read())
         # Assign an empty GeoDataFrame to polygon_districts
         polygon_districts = gpd.GeoDataFrame()
-    
+
+# Assuming polygon_districts is your GeoDataFrame
+print("Column names in polygon_districts:", polygon_districts.columns)
+
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district

@@ -12,14 +12,13 @@ import requests
 
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
 
-#requests to get data and conversion to dataframe
-one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=0").to_json()
-two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=0").to_json()
-three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=0").to_json()
-four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=0").to_json()
-polygon_districts = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0")
+#read date
+one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=0")
+two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=0")
+three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=0")
+four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=0")
 
- # concat of crime data for 2021-2024
+# Concatenate DataFrames
 df = pd.concat([one, two, three, four])
 
 # dataframe with amount of crimes in each district grouped by type of crime

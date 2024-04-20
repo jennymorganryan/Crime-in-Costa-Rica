@@ -22,8 +22,10 @@ df = pd.concat([one, two, three, four])
 #polygon coordinates dataframe
 polygon_districts = gpd.read_file("Distritos_de_Costa_Rica.geojson")
     
+# dataframe with amount of crimes in each district grouped by type of crime
+crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district
-total_crime_count = df.groupby('Distrito').size().reset_index(name='Crimen total desde 2021')
+total_crime_count = crime_count.groupby('Distrito')['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
 # dataframe with the total amount of crimes in 2021
 one_total = one.groupby('Distrito').size().reset_index(name='Delitos Total 2021')
 # dataframe with the total amount of crimes in 2022

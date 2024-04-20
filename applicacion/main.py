@@ -21,7 +21,7 @@ four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estad
 # Concatenate DataFrames
 df = pd.concat([one, two, three, four])
 
-polygon_districts_data = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0")
+polygon_districts_data = requests.get("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=0y3ou3tm&dl=0?dl=1")
 polygon_districts= geopandas.GeoDataFrame.from_features(polygon_districts_data, crs="EPSG:5367")
 
 

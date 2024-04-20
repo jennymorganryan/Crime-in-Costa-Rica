@@ -22,7 +22,7 @@ four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estad
 df = pd.concat([one, two, three, four])
 
 #polygon coordinates dataframe
-url = geopandas.read_file("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=m02k7d4n&dl=0")
+url = gpd.read_file("Distritos_de_Costa_Rica.geojson")
     
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 

@@ -39,9 +39,8 @@ merged_popup = gpd.GeoDataFrame(
     pd.merge(polygon_districts, years_total, left_on='NOM_DIST', right_on='Distrito', how='inner'),
     geometry='geometry'
 )
-pd.set_option('display.max_rows', None)  # Show all rows
-pd.set_option('display.max_columns', None)  # Show all columns
-
+#free up memory
+del one, two, three, four, one_total, two_total, three_total, four_total
 
 
 # Costa Rica country coordinates & creation of the map object

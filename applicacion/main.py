@@ -9,9 +9,6 @@ import arcgis
 import arcgis.geoanalytics
 from arcgis.gis import GIS
 import requests
-from pathlib import Path
-from zipfile import ZipFile, BadZipFile
-import urllib
 
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
 
@@ -25,38 +22,8 @@ four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estad
 df = pd.concat([one, two, three, four])
 
 #polygon coordinates dataframe
-url = "https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=m02k7d4n&dl=0"
-
-try:
-    polygon_districts = gpd.read_file(url)
-except Exception:
-    # Extract filename from URL
-    filename = urllib.parse.urlparse(url).path.split("/")[-1]
+url = geopandas.read_file("https://www.dropbox.com/scl/fi/evnmc70nvkq4t00cdhsf2/Distritos_de_Costa_Rica.geojson?rlkey=eagdt1l1hcldychenhxboxfxy&st=m02k7d4n&dl=0")
     
-    # Download the file
-    r = requests.get(url, stream=True, headers={"User-Agent": "XY"})
-    
-    # Save the file locally
-    with open(filename, "wb") as fd:
-        for chunk in r.iter_content(chunk_size=128):
-            fd.write(chunk)
-    
-    try:
-        # Attempt to extract if the file is a ZIP
-        zfile = ZipFile(filename)
-        zfile.extractall()
-        # Read the extracted GeoJSON file
-        polygon_districts = gpd.read_file(filename.split(".")[0])
-    except BadZipFile:
-        # If it's not a ZIP or extraction fails, print the content of the file
-        with open(filename) as fh:
-            print(fh.read())
-        # Assign an empty GeoDataFrame to polygon_districts
-        polygon_districts = gpd.GeoDataFrame()
-
-# Assuming polygon_districts is your GeoDataFrame
-print("Column names in polygon_districts:", polygon_districts.columns)
-
 # dataframe with amount of crimes in each district grouped by type of crime
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021') 
  # dataframe with the total amount of crimes in each district

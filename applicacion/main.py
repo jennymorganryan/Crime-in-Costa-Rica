@@ -8,7 +8,7 @@ from flask import Flask, render_template
 import arcgis
 import arcgis.geoanalytics
 from arcgis.gis import GIS
-import requests
+
 
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
 

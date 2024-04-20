@@ -1,4 +1,4 @@
-#!/Users/jennymorgan/Desktop/cr_crimen/.venv/bin/python3
+#!/Users/jennymorgan/Desktop/cr_crimen/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

@@ -6,6 +6,7 @@ from flask import Flask
 from flask import Flask, render_template
 import arcgis
 import arcgis.geoanalytics
+import gc
 
 
 #TRANSLATIONS: distrito = district, crimen = crime, delitos = crimes
@@ -41,7 +42,7 @@ merged_popup = gpd.GeoDataFrame(
 )
 #free up memory
 del one, two, three, four, one_total, two_total, three_total, four_total
-
+gc.collect()
 
 # Costa Rica country coordinates & creation of the map object
 costa_rica_coordinates = [9.7489, -83.7534]

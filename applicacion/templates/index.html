@@ -1,41 +1,64 @@
 <!doctype html>
 <html lang="en" class="h-100">
   <head>
-    <link rel="stylesheet" href="style.css">
     <meta charset="utf-8">
     <title>Crime in Costa Rica</title>
 
-    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/cover/">
-
-    
-
-    <!-- Bootstrap core CSS -->
-<link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    
     <!-- Custom styles for this template -->
     <link href="cover.css" rel="stylesheet">
+
+    <!-- Inline CSS -->
+    <style>
+      /* CSS from style.css */
+      * {
+        font-family: Consolas;
+        font-weight: 200;
+      }
+
+      body {
+        background-color: #e1dfd4;
+      }
+
+      .title_container {
+        position: relative;
+        border-radius: 50px;
+        background-color: rgb(111, 162, 171);
+        color: #ffffff;
+      }
+
+      .title {
+        text-align: center;
+      }
+
+      .crime_map_container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+      }
+
+      .crime_map {
+        height: 50%;
+        width: 50%;
+        padding: 100px;
+      }
+    </style>
   </head>
-  <body class="d-flex h-100 text-center text-white bg-dark">
-    
-<div class="front_container">
-    <div class="title_container">
-      <h1 class="title">Post-COVID Crime in Costa Rica by District</h1>
+  <body class="body_container">
+    <div class="front_container">
+      <div class="title_container">
+        <h1 class="title">Post-COVID Crime in Costa Rica by District</h1>
+      </div>
+
+      <main class="crime_map_container">
+        <div class="crime_map">
+          {{map|safe}}
+        </div>
+      </main>
+
+      <footer class="footer">
+      </footer>
     </div>
 
-<main class="crime_container">
-    <div class="crime_map" style="margin: 0 auto;">
-        {{map|safe}}
-    </div>
-</main>
-
-
-
-  <footer class="footer">
-  </footer>
-</div>
-
-
-    
   </body>
 </html>

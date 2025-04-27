@@ -8,7 +8,7 @@ import gc
 one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=1", engine='xlrd')
 two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", engine='openpyxl')
 three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=1", engine='openpyxl')
-four = pd.read_excel("https://www.dropbox.com/scl/fi/vi8gaw6f0npk27rh7i4u8/estadsticaspoliciales2024.xls?rlkey=nugn9gwiyv36f5mxbevgwnvw2&st=txwpbc3x&dl=1", engine='xlrd')
+four = pd.read_excel("https://www.dropbox.com/scl/fi/lsbld4k8htzd06m7njbar/estadsticaspoliciales2024.xls?rlkey=4g8tv502w00wekw0gbsywyr1j&st=zsld1emk&dl=1", engine='xlrd')
 
 # Merge datasets
 df = pd.concat([one, two, three, four])
@@ -43,7 +43,7 @@ colormap = branca.colormap.LinearColormap(
     vmin=total_crime_count['Crimen total desde 2021'].quantile(0),
     vmax=total_crime_count['Crimen total desde 2021'].quantile(1),
     colors=["white", "yellow", "orange", "red", "darkred"],
-    caption="Total Crime from 2021 (post-COVID)"
+    caption="Total Crime from 2021-2024 (post-COVID)"
 ).add_to(m)
 
 gj = folium.GeoJson(
@@ -60,8 +60,8 @@ gj = folium.GeoJson(
 
 popup = folium.GeoJsonPopup(
     name="Crime",
-    fields=["NOM_DIST", "Crimen total desde 2021", "Delitos Total 2021", "Delitos Total 2022", "Delitos Total 2023"],
-    aliases=["District:", "Total Crime 2021-2024", "2021", "2022", "2023"],
+    fields=["NOM_DIST", "Crimen total desde 2021", "Delitos Total 2021", "Delitos Total 2022", "Delitos Total 2023", "Delitos Total 2024"],
+    aliases=["District:", "Total Crime 2021-2024", "2021", "2022", "2023", "2024"],
     localize=True,
     labels=True,
     style="background-color: white;"

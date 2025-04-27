@@ -5,40 +5,66 @@ import branca
 import gc
 
 # Read data
-one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=1", engine='xlrd')
-two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", engine='openpyxl')
-three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=1", engine='openpyxl')
-four = pd.read_excel("https://www.dropbox.com/scl/fi/lsbld4k8htzd06m7njbar/estadsticaspoliciales2024.xls?rlkey=4g8tv502w00wekw0gbsywyr1j&st=zsld1emk&dl=1", engine='xlrd')
+one = pd.read_excel(
+    "https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=1", 
+    engine='xlrd'
+)
+two = pd.read_excel(
+    "https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", 
+    engine='openpyxl'
+)
+three = pd.read_excel(
+    "https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=1", 
+    engine='openpyxl'
+)
+four = pd.read_excel(
+    "https://www.dropbox.com/scl/fi/lsbld4k8htzd06m7njbar/estadsticaspoliciales2024.xls?rlkey=4g8tv502w00wekw0gbsywyr1j&st=zsld1emk&dl=1", 
+    engine='xlrd'
+)
 
-# Merge datasets
+# Merge all datasets together for overall use
 df = pd.concat([one, two, three, four])
 
-# Load polygons
+# Load polygon shapes
 polygon_districts = gpd.read_file("Distritos_de_Costa_Rica.geojson")
 
-# Crime calculations
+# Calculate crime counts
 crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021')
 total_crime_count = crime_count.groupby('Distrito')['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
 
+# Calculate per-year totals
 one_total = one.groupby('Distrito').size().reset_index(name='Delitos Total 2021')
 two_total = two.groupby('Distrito').size().reset_index(name='Delitos Total 2022')
 three_total = three.groupby('Distrito').size().reset_index(name='Delitos Total 2023')
 four_total = four.groupby('Distrito').size().reset_index(name='Delitos Total 2024')
 
-years_total = pd.merge(pd.merge(pd.merge(one_total, two_total, on='Distrito'), three_total, on='Distrito'), total_crime_count, on='Distrito')
+# Merge all yearly totals together
+years_total = pd.merge(
+    pd.merge(
+        pd.merge(
+            pd.merge(one_total, two_total, on='Distrito'),
+            three_total, on='Distrito'
+        ),
+        four_total, on='Distrito'
+    ),
+    total_crime_count, on='Distrito'
+)
+
+# Merge yearly totals into the GeoDataFrame
 merged_popup = gpd.GeoDataFrame(
     pd.merge(polygon_districts, years_total, left_on='NOM_DIST', right_on='Distrito', how='inner'),
     geometry='geometry'
 )
 
-# Free up memory
+# Free memory
 del one, two, three, four, one_total, two_total, three_total, four_total
 gc.collect()
 
-# Build map
+# Build the Folium map
 costa_rica_coordinates = [9.7489, -83.7534]
 m = folium.Map(location=costa_rica_coordinates, zoom_start=8)
 
+# Define color map
 colormap = branca.colormap.LinearColormap(
     vmin=total_crime_count['Crimen total desde 2021'].quantile(0),
     vmax=total_crime_count['Crimen total desde 2021'].quantile(1),
@@ -46,6 +72,7 @@ colormap = branca.colormap.LinearColormap(
     caption="Total Crime from 2021-2024 (post-COVID)"
 ).add_to(m)
 
+# Add GeoJson layer
 gj = folium.GeoJson(
     merged_popup,
     name='geojson',
@@ -58,17 +85,33 @@ gj = folium.GeoJson(
     }
 ).add_to(m)
 
+# Define popups for districts
 popup = folium.GeoJsonPopup(
     name="Crime",
-    fields=["NOM_DIST", "Crimen total desde 2021", "Delitos Total 2021", "Delitos Total 2022", "Delitos Total 2023", "Delitos Total 2024"],
-    aliases=["District:", "Total Crime 2021-2024", "2021", "2022", "2023", "2024"],
+    fields=[
+        "NOM_DIST", 
+        "Crimen total desde 2021", 
+        "Delitos Total 2021", 
+        "Delitos Total 2022", 
+        "Delitos Total 2023", 
+        "Delitos Total 2024"
+    ],
+    aliases=[
+        "District:", 
+        "Total Crime 2021-2024", 
+        "2021", 
+        "2022", 
+        "2023", 
+        "2024"
+    ],
     localize=True,
     labels=True,
     style="background-color: white;"
 ).add_to(gj)
 
+# Add layer control to switch layers
 folium.LayerControl().add_to(m)
 
-# Export map object
+# Export the map object
 def get_map():
     return m

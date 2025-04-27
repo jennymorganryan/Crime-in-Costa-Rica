@@ -10,3 +10,4 @@ fiona==1.9.5
 gdal==3.6.2
 pyproj==3.7.1
 requests==2.31.0
+gunicorn==21.2.0

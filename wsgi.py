@@ -1,6 +1,13 @@
-from flask import Flask
+from flask import Flask, render_template
+from applicacion.build_map import get_map
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='applicacion/templates')
+
+@app.route('/')
+def home():
+    m = get_map()
+    map_html = m._repr_html_()
+    return render_template('index.html', map=map_html)
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)

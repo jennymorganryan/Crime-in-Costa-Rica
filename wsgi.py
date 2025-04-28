@@ -1,14 +1,15 @@
 import os
 from flask import Flask, render_template
+from pathlib import Path
 
 app = Flask(__name__)
 
-# Prebuild the map once at server start
-from applicacion.build_map import build_and_save_map
-build_and_save_map()
-
 @app.route("/")
 def home():
+    # Only build map if not already built
+    if not Path("static/map.html").exists():
+        from applicacion.build_map import build_and_save_map
+        build_and_save_map()
     return render_template("index.html")
 
 if __name__ == "__main__":

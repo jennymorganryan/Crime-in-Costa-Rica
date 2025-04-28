@@ -1,17 +1,15 @@
-import os
 from flask import Flask, render_template
-from pathlib import Path
+from applicacion.build_map import get_map
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    # Only build map if not already built
-    if not Path("static/map.html").exists():
-        from applicacion.build_map import build_and_save_map
-        build_and_save_map()
-    return render_template("index.html")
+    map_object = get_map()  # build the map dynamically
+    map_html = map_object._repr_html_()
+    return render_template("index.html", map=map_html)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
+    import os
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

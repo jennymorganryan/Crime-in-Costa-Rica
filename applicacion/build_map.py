@@ -92,5 +92,7 @@ def build_and_save_map():
 
     folium.LayerControl().add_to(m)
 
-    # Save the map to static folder
-    m.save("static/map.html")
+    def get_map():
+        # (your code to build 'm')
+        return m
+

@@ -1,52 +1,126 @@
 <!doctype html>
-<html lang="en" class="h-100">
-<head>
-  <meta charset="utf-8">
-  <title>Crime in Costa Rica</title>
-
-  <style>
-    body {
-      background-color: #e1dfd4;
-      font-family: Consolas, monospace;
-      font-weight: 200;
-    }
-    .title_container {
-      border-radius: 50px;
-      background-color: rgb(111, 162, 171);
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-    .crime_map_container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-    iframe {
-      border: none;
-      width: 90%;
-      height: 600px;
-    }
-    .footer {
-      padding: 20px;
-      text-align: center;
-      color: white;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="title_container">
-    <h1>Post-COVID Crime in Costa Rica by District</h1>
-  </div>
-
-  <div class="crime_map_container">
-    <iframe src="/static/map.html"></iframe>
-  </div>
-
-  <footer class="footer">
-    Created by Jenny Morgan
-  </footer>
-</body>
-</html>
+ <html lang="en" class="h-100">
+   <head>
+     <meta charset="utf-8">
+     <title>Crime in Costa Rica</title>
+ 
+     <!-- Custom styles for this template -->
+     <link href="cover.css" rel="stylesheet">
+ 
+     <!-- Inline CSS -->
+     <style>
+       /* CSS from style.css */
+       * {
+         font-family: Consolas;
+         font-weight: 200;
+       }
+ 
+       body {
+         background-color: #e1dfd4;
+       }
+ 
+       .front_container {
+       display: flex;
+       flex-direction: column;
+       height: 100%; 
+     }
+         display: flex;
+         flex-direction: column;
+         height: 100%; 
+       }
+ 
+       .title_container {
+         position: relative;
+         border-radius: 50px;
+         background-color: rgb(111, 162, 171);
+         color: #ffffff;
+       }
+ 
+       .title {
+         text-align: center;
+       }
+ 
+       .crime_map_container {
+         display: flex;
+         flex: 1;
+         align-items: center;
+         justify-content: center;
+         height: 200px;
+       }
+ 
+       .crime_map {
+         height: 90%;
+         width: 90%;
+         padding: 50px;
+         padding-top: 100px;
+       }
+ 
+       .footer {
+         padding: 20px;
+         color: #fff;
+         width: 100%;
+         line-height: 50px;
+         text-align: center;
+         margin-bottom: auto;
+       }
+ 
+       /* --- Added loading spinner CSS --- */
+       #loading {
+         position: fixed;
+         width: 100%;
+         height: 100%;
+         background: white;
+         z-index: 1000;
+         top: 0;
+         left: 0;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+       }
+ 
+       .spinner {
+         border: 8px solid #f3f3f3;
+         border-top: 8px solid #3498db;
+         border-radius: 50%;
+         width: 80px;
+         height: 80px;
+         animation: spin 1s linear infinite;
+       }
+ 
+       @keyframes spin {
+         0% { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+       }
+     </style>
+   </head>
+ 
+   <body class="body_container">
+     <div id="loading">
+       <div class="spinner"></div>
+     </div>
+ 
+     <div class="front_container">
+       <div class="title_container">
+         <h1 class="title">Post-COVID Crime in Costa Rica by District</h1>
+       </div>
+ 
+       <main class="crime_map_container">
+         <div class="crime_map">
+           {{map|safe}}
+         </div>
+       </main>
+ 
+       <footer class="footer">
+         Created by Jenny Morgan
+       </footer>
+     </div>
+ 
+     <!-- Inline script to handle loading screen -->
+     <script>
+       // When the page fully loads, hide the spinner
+       window.addEventListener('load', function() {
+           document.getElementById('loading').style.display = 'none';
+       });
+     </script>
+   </body>
+ </html>

@@ -73,12 +73,12 @@ def build_and_save_map():
         merged_popup,
         name='geojson',
         style_function=lambda x: {
-            "fillColor": colormap(x["properties"]["Crimen total desde 2021"])
-            if x["properties"]["Crimen total desde 2021"] != "No Data"
-            else "transparent",
+            "fillColor": colormap(x["properties"]["Crimen total desde 2021"]) 
+            if x["properties"].get("Crimen total desde 2021") is not None else "transparent",
             "color": "black",
             "fillOpacity": 0.4,
         }
+
     ).add_to(m)
 
     folium.GeoJsonPopup(

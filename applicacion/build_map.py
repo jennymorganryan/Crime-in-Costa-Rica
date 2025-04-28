@@ -11,68 +11,88 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 # Read polygons
 polygon_districts = gpd.read_file(os.path.join(DATA_DIR, "Distritos_de_Costa_Rica.geojson"))
 
+# helper function to normalize column names (in our case, 'Canton' and 'Distrito')
+def normalize_column(col):
+    return col.str.normalize('NFKD')\
+            .str.encode('ascii', errors='ignore')\
+            .str.decode('utf-8')\
+            .str.lower()\
+            .str.strip()\
+            .apply(lambda x: re.sub(r'\s+', ' ', x))\
+            .apply(lambda x: re.sub(r'[^\w\s]', '', x))
 
+# function to create and return our choropleth map         
 def get_map():
+    
+    # Load our map points from the geojson file
+    polygon_districts = gpd.read_file("data/Distritos_de_Costa_Rica.geojson")
+    
     # Read crime data
     one = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2021.xls"), engine="xlrd")
     two = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2022.xlsx"), engine="openpyxl")
     three = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2023.xlsx"), engine="openpyxl")
     four = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2024.xls"), engine="xlrd")
 
+    # After reading the 4 datasets we normaize the 'Canton' and 'Distrito' columns to prep for merging
+    one['Canton'] = normalize_column(one['Canton'])
+    one['Distrito'] = normalize_column(one['Distrito'])
+
+    two['Canton'] = normalize_column(two['Canton'])
+    two['Distrito'] = normalize_column(two['Distrito'])
+
+    three['Canton'] = normalize_column(three['Canton'])
+    three['Distrito'] = normalize_column(three['Distrito'])
+
+    four['Canton'] = normalize_column(four['Canton'])
+    four['Distrito'] = normalize_column(four['Distrito'])
+
     # Merge all datasets together for overall use
     df = pd.concat([one, two, three, four])
 
-    # Load polygon shapes
-    polygon_districts = gpd.read_file("data/Distritos_de_Costa_Rica.geojson")
+        
+    # Normalize 'Canton' column in geojson
+    polygon_districts['NOM_CANT'] = normalize_column(polygon_districts['NOM_CANT']) 
+        
 
-    # Calculate crime counts
-    crime_count = df.groupby(['Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021')
-    total_crime_count = crime_count.groupby('Distrito')['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
+    # Normalize polygon districts in geojson
+    polygon_districts['NOM_DIST'] = normalize_column(polygon_districts['NOM_DIST'])
+    
+        
+    # Calculate total crime counts by year
+    one_total = one.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2021')
+    two_total = two.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2022')
+    three_total = three.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2023')
+    four_total = four.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2024')
 
-    # Calculate per-year totals
-    one_total = one.groupby('Distrito').size().reset_index(name='Delitos Total 2021')
-    two_total = two.groupby('Distrito').size().reset_index(name='Delitos Total 2022')
-    three_total = three.groupby('Distrito').size().reset_index(name='Delitos Total 2023')
-    four_total = four.groupby('Distrito').size().reset_index(name='Delitos Total 2024')
+    # Calculate total crime counts for all evaluated years (2021 - 2024)
+    crime_count = df.groupby(['Canton', 'Distrito', 'Delito']).size().reset_index(name='Ocurencias desde 2021')
+    total_crime_count = crime_count.groupby(['Canton', 'Distrito'])['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
+
 
     # Merge all yearly totals together
     years_total = pd.merge(
         pd.merge(
             pd.merge(
-                pd.merge(one_total, two_total, on='Distrito'),
-                three_total, on='Distrito'
+                pd.merge(one_total, two_total, on=['Canton', 'Distrito']),
+                three_total, on=['Canton', 'Distrito']
             ),
-            four_total, on='Distrito'
+            four_total, on=['Canton', 'Distrito']
         ),
-        total_crime_count, on='Distrito'
+        total_crime_count, on=['Canton', 'Distrito']
     )
-    # Normalize polygon districts
-    polygon_districts['NOM_DIST'] = polygon_districts['NOM_DIST']\
-        .str.normalize('NFKD')\
-        .str.encode('ascii', errors='ignore')\
-        .str.decode('utf-8')\
-        .str.lower()\
-        .str.strip()\
-        .apply(lambda x: re.sub(r'\s+', ' ', x))\
-        .apply(lambda x: re.sub(r'[^\w\s]', '', x))
-
-    # Normalize crime data districts
-    years_total['Distrito'] = years_total['Distrito']\
-        .str.normalize('NFKD')\
-        .str.encode('ascii', errors='ignore')\
-        .str.decode('utf-8')\
-        .str.lower()\
-        .str.strip()\
-        .apply(lambda x: re.sub(r'\s+', ' ', x))\
-        .apply(lambda x: re.sub(r'[^\w\s]', '', x))
-        
+    
         
     # Merge yearly totals into the GeoDataFrame
     merged_popup = gpd.GeoDataFrame(
-        pd.merge(polygon_districts, years_total, left_on='NOM_DIST', right_on='Distrito', how='left'),
+        pd.merge(
+            polygon_districts, 
+            years_total, 
+            left_on=['NOM_CANT', 'NOM_DIST'], 
+            right_on=['Canton', 'Distrito'], 
+            how='left'
+        ),
         geometry='geometry'
     )
-
 
     # Free memory
     del one, two, three, four, one_total, two_total, three_total, four_total
@@ -131,3 +151,5 @@ def get_map():
     folium.LayerControl().add_to(m)
 
     return m
+
+get_map()

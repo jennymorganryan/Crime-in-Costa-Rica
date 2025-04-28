@@ -5,6 +5,7 @@ import branca
 import re
 import gc
 
+# Utility function to normalize text for matching
 def normalize(series):
     return series\
         .astype(str)\
@@ -16,22 +17,28 @@ def normalize(series):
         .apply(lambda x: re.sub(r'\s+', ' ', x) if isinstance(x, str) else x)\
         .apply(lambda x: re.sub(r'[^\w\s]', '', x) if isinstance(x, str) else x)
 
-# Load polygon GeoJSON immediately
+# Load lightweight GeoJSON first
 polygon_districts = gpd.read_file("Distritos_de_Costa_Rica.geojson")
 polygon_districts['NOM_DIST'] = normalize(polygon_districts['NOM_DIST'])
 polygon_districts['NOM_CANT'] = normalize(polygon_districts['NOM_CANT'])
 
-def get_map():
-    # Lazy load Excel files inside function
-    one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=1", engine='xlrd')
-    two = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", engine='openpyxl')
-    three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=1", engine='openpyxl')
-    four = pd.read_excel("https://www.dropbox.com/scl/fi/wqj8g3aetkjfztltpot4h/estadsticaspoliciales2024.xls?rlkey=axnophirvnu30b78ezjb63x80&st=fjvus2h6&dl=1", engine='xlrd')
+# Function to dynamically build and return map
 
+def get_map():
+    # Load local Excel files from data folder
+    one = pd.read_excel("data/estadsticaspoliciales2021.xls", engine='xlrd')
+    two = pd.read_excel("data/estadsticaspoliciales2022.xlsx", engine='openpyxl')
+    three = pd.read_excel("data/estadsticaspoliciales2023.xlsx", engine='openpyxl')
+    four = pd.read_excel("data/estadsticaspoliciales2024.xls", engine='xlrd')
+
+    # Merge data
     df = pd.concat([one, two, three, four])
+
+    # Normalize district and canton names
     df['Distrito'] = normalize(df['Distrito'])
     df['Canton'] = normalize(df['Canton'])
 
+    # Create crime summary dataframes
     crime_count = df.groupby(['Distrito', 'Canton', 'Delito']).size().reset_index(name='Ocurencias desde 2021')
     total_crime_count = crime_count.groupby(['Distrito', 'Canton'])['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
 
@@ -40,6 +47,7 @@ def get_map():
     three_total = three.groupby(['Distrito', 'Canton']).size().reset_index(name='Delitos Total 2023')
     four_total = four.groupby(['Distrito', 'Canton']).size().reset_index(name='Delitos Total 2024')
 
+    # Merge all years
     years_total = pd.merge(
         pd.merge(
             pd.merge(
@@ -51,6 +59,7 @@ def get_map():
         total_crime_count, on=['Distrito', 'Canton']
     )
 
+    # Create a join key
     polygon_districts['district_canton'] = polygon_districts['NOM_DIST'] + " - " + polygon_districts['NOM_CANT']
     years_total['district_canton'] = years_total['Distrito'] + " - " + years_total['Canton']
 
@@ -59,6 +68,7 @@ def get_map():
         geometry='geometry'
     )
 
+    # Build Folium map
     costa_rica_coordinates = [9.7489, -83.7534]
     m = folium.Map(location=costa_rica_coordinates, zoom_start=8)
 
@@ -73,8 +83,7 @@ def get_map():
         merged_popup,
         name='geojson',
         style_function=lambda x: {
-            "fillColor": colormap(x["properties"]["Crimen total desde 2021"])
-            if x["properties"].get("Crimen total desde 2021") is not None else "transparent",
+            "fillColor": colormap(x["properties"].get("Crimen total desde 2021", 0)) if x["properties"].get("Crimen total desde 2021") else "transparent",
             "color": "black",
             "fillOpacity": 0.4,
         }
@@ -90,9 +99,5 @@ def get_map():
     ).add_to(gj)
 
     folium.LayerControl().add_to(m)
-
-    # Cleanup memory
-    del one, two, three, four, one_total, two_total, three_total, four_total
-    gc.collect()
 
     return m

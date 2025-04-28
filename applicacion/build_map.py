@@ -16,15 +16,15 @@ def normalize(series):
         .apply(lambda x: re.sub(r'\s+', ' ', x) if isinstance(x, str) else x)\
         .apply(lambda x: re.sub(r'[^\w\s]', '', x) if isinstance(x, str) else x)
 
-# Load only the lightweight GeoJSON immediately
+# Load polygon GeoJSON immediately
 polygon_districts = gpd.read_file("Distritos_de_Costa_Rica.geojson")
 polygon_districts['NOM_DIST'] = normalize(polygon_districts['NOM_DIST'])
 polygon_districts['NOM_CANT'] = normalize(polygon_districts['NOM_CANT'])
 
-def build_and_save_map():
-    # Lazy load big Excel files
+def get_map():
+    # Lazy load Excel files inside function
     one = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2021.xls?rlkey=ldvgqoh7ml3p3ivpjpmk6ebmm&st=3jz9kkyy&dl=1", engine='xlrd')
-    two = pd.read_excel("https://www.dropbox.com/scl/fi/t0q93ydab9yqder6umvk3/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", engine='openpyxl')
+    two = pd.read_excel("https://www.dropbox.com/scl/fi/20qkrvlcrjv4ur5rknm6o/estadsticaspoliciales2022.xlsx?rlkey=34dr2an4wfqlcsrln1yhxanc5&st=jjt8nq46&dl=1", engine='openpyxl')
     three = pd.read_excel("https://www.dropbox.com/scl/fi/45k4w5kde9cn7h5edkdsx/estadsticaspoliciales2023.xlsx?rlkey=zxaepnht3b13bswfyw19raoql&st=3fpz2b2j&dl=1", engine='openpyxl')
     four = pd.read_excel("https://www.dropbox.com/scl/fi/wqj8g3aetkjfztltpot4h/estadsticaspoliciales2024.xls?rlkey=axnophirvnu30b78ezjb63x80&st=fjvus2h6&dl=1", engine='xlrd')
 
@@ -73,12 +73,11 @@ def build_and_save_map():
         merged_popup,
         name='geojson',
         style_function=lambda x: {
-            "fillColor": colormap(x["properties"]["Crimen total desde 2021"]) 
+            "fillColor": colormap(x["properties"]["Crimen total desde 2021"])
             if x["properties"].get("Crimen total desde 2021") is not None else "transparent",
             "color": "black",
             "fillOpacity": 0.4,
         }
-
     ).add_to(m)
 
     folium.GeoJsonPopup(
@@ -92,7 +91,8 @@ def build_and_save_map():
 
     folium.LayerControl().add_to(m)
 
-    def get_map():
-        # (your code to build 'm')
-        return m
+    # Cleanup memory
+    del one, two, three, four, one_total, two_total, three_total, four_total
+    gc.collect()
 
+    return m

@@ -19,8 +19,8 @@ def normalize_column(col):
             .str.decode('utf-8')\
             .str.lower()\
             .str.strip()\
-            .apply(lambda x: re.sub(r'\s+', ' ', x))\
-            .apply(lambda x: re.sub(r'[^\w\s]', '', x))
+            .str.replace(r'\s+', ' ', regex=True)\
+            .str.replace(r'[^\w\s]', '', regex=True)
 
 # function to create and return our choropleth map         
 def get_map():

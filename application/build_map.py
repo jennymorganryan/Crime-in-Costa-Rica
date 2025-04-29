@@ -119,7 +119,7 @@ def get_map():
         style_function=lambda x: {
             "fillColor": colormap(x["properties"]["Crimen total desde 2021"])
             if x["properties"]["Crimen total desde 2021"] is not None
-            else "transparent",
+            else "gray",
             "color": "black",
             "fillOpacity": 0.4,
         }
@@ -146,8 +146,10 @@ def get_map():
         ],
         localize=True,
         labels=True,
-        style="background-color: white;"
+        style="background-color: white;",
     ).add_to(gj)
+    
+    
 
     # Add layer control to switch layers
     folium.LayerControl().add_to(m)

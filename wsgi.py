@@ -4,8 +4,12 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
+def loading ():
+    return render_template("loading_page.html")
+
+@app.route("/map")
 def home():
-    from applicacion.build_map import get_map
+    from application.build_map import get_map
     map_html = get_map()._repr_html_()
     return render_template("index.html", map=map_html)
 

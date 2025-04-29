@@ -6,9 +6,10 @@ import gc
 import re
 import os
 
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
-# Read polygons
+# Read geoJSON file for Costa Rica districts
 polygon_districts = gpd.read_file(os.path.join(DATA_DIR, "Distritos_de_Costa_Rica.geojson"))
 
 # helper function to normalize column names (in our case, 'Canton' and 'Distrito')
@@ -33,7 +34,8 @@ def get_map():
     three = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2023.xlsx"), engine="openpyxl")
     four = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2024.xls"), engine="xlrd")
 
-    # After reading the 4 datasets we normaize the 'Canton' and 'Distrito' columns to prep for merging
+
+    # After reading the 4 datasets we normalize the 'Canton' and 'Distrito' columns to prep for merging
     one['Canton'] = normalize_column(one['Canton'])
     one['Distrito'] = normalize_column(one['Distrito'])
 
@@ -107,7 +109,7 @@ def get_map():
         vmin=total_crime_count['Crimen total desde 2021'].quantile(0),
         vmax=total_crime_count['Crimen total desde 2021'].quantile(1),
         colors=["white", "yellow", "orange", "red", "darkred"],
-        caption="Total Crime from 2021-2024 (post-COVID)"
+        caption="Total Number of Reported Crimes Committed POST-COVID (2021-2024)"
     ).add_to(m)
 
     # Add GeoJson layer
@@ -136,11 +138,11 @@ def get_map():
         ],
         aliases=[
             "District:", 
-            "Total Crime 2021-2024", 
-            "2021", 
-            "2022", 
-            "2023", 
-            "2024"
+            "Reported Crimes 2021-2024:", 
+            "Reported Crimes 2021:", 
+            "Reported Crimes 2022:", 
+            "Reported Crimes 2023:", 
+            "Reported Crimes 2024:"
         ],
         localize=True,
         labels=True,
@@ -152,4 +154,3 @@ def get_map():
 
     return m
 
-get_map()

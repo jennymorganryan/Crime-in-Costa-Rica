@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Loading...</title>
+  <style>
+/* --- Added loading spinner CSS --- */
+#loading {
+         position: fixed;
+         width: 100%;
+         height: 100%;
+         background: white;
+         z-index: 1000;
+         top: 0;
+         left: 0;
+         display: flex;
+         flex-direction: column;
+         align-items: center;
+         justify-content: center;
+       }
+ 
+       .spinner {
+         border: 8px solid #f3f3f3;
+         border-top: 8px solid #3498db;
+         border-radius: 50%;
+         width: 80px;
+         height: 80px;
+         animation: spin 1s linear infinite;
+         margin-bottom: 20px;
+       }
+ 
+       @keyframes spin {
+         0% { transform: rotate(0deg); }
+         100% { transform: rotate(360deg); }
+       }
+
+/* --- Added loading text CSS --- */
+       .loading-text {
+         z-index: 1100;
+         text-align: center;
+         font-size: 24px;
+         color: #3498db;
+       }
+
+  </style>
+</head>
+
+<body class="body_container">
+  <div id="loading">
+    <div class="spinner"></div>
+    <div class="loading-text"> Loading... 🤠</div>
+  </div>
+
+
+  <script>
+    // After 1 second, redirect to /map
+    setTimeout(function() {
+      window.location.href = "/map";
+    }, 1000); 
+  </script>
+</body>
+</html>

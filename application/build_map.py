@@ -9,8 +9,7 @@ import os
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 
-# Read geoJSON file for Costa Rica districts
-polygon_districts = gpd.read_file(os.path.join(DATA_DIR, "Distritos_de_Costa_Rica.geojson"))
+
 
 # helper function to normalize column names (in our case, 'Canton' and 'Distrito')
 def normalize_column(col):
@@ -25,7 +24,7 @@ def normalize_column(col):
 # function to create and return our choropleth map         
 def get_map():
     
-    # Load our map points from the geojson file
+    # Read geoJSON file for Costa Rica districts
     polygon_districts = gpd.read_file("data/Distritos_de_Costa_Rica.geojson")
     
     # Read crime data
@@ -71,16 +70,16 @@ def get_map():
     total_crime_count = crime_count.groupby(['Canton', 'Distrito'])['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
 
 
-    # Merge all yearly totals together
+    # Merge totals together for each year
     years_total = pd.merge(
         pd.merge(
             pd.merge(
-                pd.merge(one_total, two_total, on=['Canton', 'Distrito']),
-                three_total, on=['Canton', 'Distrito']
+                pd.merge(one_total, two_total, on=['Canton', 'Distrito'], how='outer'),
+                three_total, on=['Canton', 'Distrito'], how='outer'
             ),
-            four_total, on=['Canton', 'Distrito']
+            four_total, on=['Canton', 'Distrito'], how='outer'
         ),
-        total_crime_count, on=['Canton', 'Distrito']
+        total_crime_count, on=['Canton', 'Distrito'], how='outer'
     )
     
         
@@ -95,6 +94,33 @@ def get_map():
         ),
         geometry='geometry'
     )
+    
+    # # Test case: Check for specific districts in datasets
+    # districts_to_check = [
+    #     "monte romo", "zapotal", "porvenir", "huacas", "guacimal", "arancibia",
+    #     "union", "zapotal", "desmonte", "san luis", "san jose de la montaa",
+    #     "arenilla", "aguacaliente", "curena", "san luis", "monterry"
+    # ]
+
+    # def check_districts(dataset, dataset_name, district_column="Distrito", canton_column="Canton"):
+    #     print(f"\nChecking districts in {dataset_name}...")
+    #     for district in districts_to_check:
+    #         matches = dataset[
+    #             dataset[district_column].str.contains(district, na=False, case=False)
+    #         ]
+    #         if not matches.empty:
+    #             print(f"District '{district}' found in {dataset_name}:")
+    #             print(matches[[canton_column, district_column]].head())
+    #         else:
+    #             print(f"District '{district}' NOT found in {dataset_name}.")
+
+    # # Run the test case on all datasets
+    # check_districts(df, "df") #all present
+    # check_districts(polygon_districts, "polygon_districts", district_column="NOM_DIST", canton_column="NOM_CANT") #all found
+    # check_districts(crime_count, "crime_count") # all found
+    # check_districts(total_crime_count, "total_crime_count") # all found
+    # check_districts(years_total, "years_total") # none found
+    
 
     # Free memory
     del one, two, three, four, one_total, two_total, three_total, four_total
@@ -121,6 +147,7 @@ def get_map():
             if x["properties"]["Crimen total desde 2021"] is not None
             else "gray",
             "color": "black",
+            "weight": 1,
             "fillOpacity": 0.4,
         }
     ).add_to(m)
@@ -156,3 +183,6 @@ def get_map():
 
     return m
 
+
+
+get_map()

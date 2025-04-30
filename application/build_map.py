@@ -20,6 +20,9 @@ def normalize_column(col):
             .str.strip()\
             .str.replace(r'\s+', ' ', regex=True)\
             .str.replace(r'[^\w\s]', '', regex=True)
+# Helper function to capitalize the first letter of each word
+def capitalize_words(col):
+    return col.str.title()
 
 # function to create and return our choropleth map         
 def get_map():
@@ -96,10 +99,13 @@ def get_map():
     )
     
 
-    # Free memory
+    # Free up some memory
     del one, two, three, four, one_total, two_total, three_total, four_total
     gc.collect()
-
+    
+    # Capitalize the first letter of each word in the 'NOM_DIST' column so we can display it in the popup
+    merged_popup['NOM_DIST'] = capitalize_words(merged_popup['NOM_DIST'])
+    
     # Build the Folium map
     costa_rica_coordinates = [9.7489, -83.7534]
     m = folium.Map(location=costa_rica_coordinates, zoom_start=8)

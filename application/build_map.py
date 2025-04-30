@@ -1,5 +1,6 @@
 import pandas as pd
 import folium
+from folium.plugins import Search
 import geopandas as gpd
 import branca
 import gc
@@ -8,7 +9,6 @@ import os
 
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
-
 
 
 # helper function to normalize column names (in our case, 'Canton' and 'Distrito')
@@ -95,32 +95,6 @@ def get_map():
         geometry='geometry'
     )
     
-    # # Test case: Check for specific districts in datasets
-    # districts_to_check = [
-    #     "monte romo", "zapotal", "porvenir", "huacas", "guacimal", "arancibia",
-    #     "union", "zapotal", "desmonte", "san luis", "san jose de la montaa",
-    #     "arenilla", "aguacaliente", "curena", "san luis", "monterry"
-    # ]
-
-    # def check_districts(dataset, dataset_name, district_column="Distrito", canton_column="Canton"):
-    #     print(f"\nChecking districts in {dataset_name}...")
-    #     for district in districts_to_check:
-    #         matches = dataset[
-    #             dataset[district_column].str.contains(district, na=False, case=False)
-    #         ]
-    #         if not matches.empty:
-    #             print(f"District '{district}' found in {dataset_name}:")
-    #             print(matches[[canton_column, district_column]].head())
-    #         else:
-    #             print(f"District '{district}' NOT found in {dataset_name}.")
-
-    # # Run the test case on all datasets
-    # check_districts(df, "df") #all present
-    # check_districts(polygon_districts, "polygon_districts", district_column="NOM_DIST", canton_column="NOM_CANT") #all found
-    # check_districts(crime_count, "crime_count") # all found
-    # check_districts(total_crime_count, "total_crime_count") # all found
-    # check_districts(years_total, "years_total") # none found
-    
 
     # Free memory
     del one, two, three, four, one_total, two_total, three_total, four_total
@@ -138,7 +112,7 @@ def get_map():
         caption="Total Number of Reported Crimes Committed POST-COVID (2021-2024)"
     ).add_to(m)
 
-    # Add GeoJson layer
+    # Add GeoJson layer - 
     gj = folium.GeoJson(
         merged_popup,
         name='geojson',
@@ -176,13 +150,17 @@ def get_map():
         style="background-color: white;",
     ).add_to(gj)
     
-    
+    # Add Search plugin
+    Search(
+        layer=gj,
+        geom_type="polygon",
+        weight=0,
+        search_label="NOM_DIST", 
+        placeholder="Search for a district",
+        collapsed=True
+    ).add_to(m)
 
     # Add layer control to switch layers
     folium.LayerControl().add_to(m)
 
     return m
-
-
-
-get_map()

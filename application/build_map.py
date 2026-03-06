@@ -27,17 +27,17 @@ def capitalize_words(col):
 # function to create and return our choropleth map         
 def get_map():
     
-    # Read geoJSON file for Costa Rica districts
-    polygon_districts = gpd.read_file("data/Distritos_de_Costa_Rica.geojson")
-    
-    # Read crime data
-    one = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2021.xls"), engine="xlrd")
-    two = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2022.xlsx"), engine="openpyxl")
-    three = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2023.xlsx"), engine="openpyxl")
-    four = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2024.xls"), engine="xlrd")
+   # read geoJSON file for Costa Rica districts
+    polygon_districts = gpd.read_file("https://drive.google.com/uc?export=download&id=1Le2vTqNImgH9ekAbjJT7AKDhW3aDvGp5") 
+   
+   # read crime data
+    one = pd.read_excel( "https://docs.google.com/spreadsheets/d/1cC2ZCs2kyn_1cYkI4iAxj8aHNO_4_sm2/export?format=xlsx", engine="openpyxl") 
+    two = pd.read_excel("https://docs.google.com/spreadsheets/d/1LPpYIcKNLfenpzSGTOuhhVgPIQ3q1B1F/export?format=xlsx", engine="openpyxl")
+    three = pd.read_excel("https://docs.google.com/spreadsheets/d/15kgM8W-6wzVYKX7ijqTAAQvD4ZViusvx/export?format=xlsx", engine="openpyxl") 
+    four = pd.read_excel("https://docs.google.com/spreadsheets/d/17-kcXyS6jTnRym4X5caCjch9YUEqC1w_/export?format=xlsx", engine="openpyxl")
 
 
-    # After reading the 4 datasets we normalize the 'Canton' and 'Distrito' columns to prep for merging
+    # after reading the 4 datasets we normalize the 'Canton' and 'Distrito' columns to prep for merging
     one['Canton'] = normalize_column(one['Canton'])
     one['Distrito'] = normalize_column(one['Distrito'])
 
@@ -50,19 +50,19 @@ def get_map():
     four['Canton'] = normalize_column(four['Canton'])
     four['Distrito'] = normalize_column(four['Distrito'])
 
-    # Merge all datasets together for overall use
+    # merge all datasets together for overall use
     df = pd.concat([one, two, three, four])
 
         
-    # Normalize 'Canton' column in geojson
+    # normalize 'Canton' column in geojson
     polygon_districts['NOM_CANT'] = normalize_column(polygon_districts['NOM_CANT']) 
         
 
-    # Normalize polygon districts in geojson
+    # normalize polygon districts in geojson
     polygon_districts['NOM_DIST'] = normalize_column(polygon_districts['NOM_DIST'])
     
         
-    # Calculate total crime counts by year
+    # calculate total crime counts by year
     one_total = one.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2021')
     two_total = two.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2022')
     three_total = three.groupby(['Canton', 'Distrito']).size().reset_index(name='Delitos Total 2023')
@@ -73,7 +73,7 @@ def get_map():
     total_crime_count = crime_count.groupby(['Canton', 'Distrito'])['Ocurencias desde 2021'].sum().reset_index(name='Crimen total desde 2021')
 
 
-    # Merge totals together for each year
+    #merge totals together for each year
     years_total = pd.merge(
         pd.merge(
             pd.merge(
@@ -86,7 +86,7 @@ def get_map():
     )
     
         
-    # Merge yearly totals into the GeoDataFrame
+    #merge yearly totals into the GeoDataFrame
     merged_popup = gpd.GeoDataFrame(
         pd.merge(
             polygon_districts, 
@@ -99,18 +99,18 @@ def get_map():
     )
     
 
-    # Free up some memory
+    # free up some memory
     del one, two, three, four, one_total, two_total, three_total, four_total
     gc.collect()
     
-    # Capitalize the first letter of each word in the 'NOM_DIST' column so we can display it in the popup
+    # capitalize the first letter of each word in the 'NOM_DIST' column so we can display it in the popup
     merged_popup['NOM_DIST'] = capitalize_words(merged_popup['NOM_DIST'])
     
-    # Build the Folium map
+    # build the Folium map
     costa_rica_coordinates = [9.7489, -83.7534]
     m = folium.Map(location=costa_rica_coordinates, zoom_start=8)
 
-    # Define color map
+    # define color map
     colormap = branca.colormap.LinearColormap(
         vmin=total_crime_count['Crimen total desde 2021'].quantile(0),
         vmax=total_crime_count['Crimen total desde 2021'].quantile(1),
@@ -118,7 +118,7 @@ def get_map():
         caption="Total Number of Reported Crimes Committed POST-COVID (2021-2024)"
     ).add_to(m)
 
-    # Add GeoJson layer - 
+    # add GeoJson layer - 
     gj = folium.GeoJson(
         merged_popup,
         name='geojson',
@@ -132,7 +132,7 @@ def get_map():
         }
     ).add_to(m)
 
-    # Define popups for districts
+    # define popups for districts
     popup = folium.GeoJsonPopup(
         name="Crime",
         fields=[
@@ -156,7 +156,7 @@ def get_map():
         style="background-color: white;",
     ).add_to(gj)
     
-    # Add Search plugin
+    # add Search plugin
     Search(
         layer=gj,
         geom_type="polygon",
@@ -166,7 +166,7 @@ def get_map():
         collapsed=True
     ).add_to(m)
 
-    # Add layer control to switch layers
+    # add layer control to switch layers
     folium.LayerControl().add_to(m)
 
     return m

@@ -24,15 +24,15 @@ def normalize_column(col):
 # function to create and return our choropleth map         
 def get_map():
     
-    
     # Read geoJSON file for Costa Rica districts
-    polygon_districts = gpd.read_file("https://drive.google.com/uc?export=download&id=1Le2vTqNImgH9ekAbjJT7AKDhW3aDvGp5") 
+    polygon_districts = gpd.read_file("data/Distritos_de_Costa_Rica.geojson")
     
-    # Read crime data 
-    one = pd.read_excel( "https://docs.google.com/spreadsheets/d/1cC2ZCs2kyn_1cYkI4iAxj8aHNO_4_sm2/export?format=xlsx", engine="openpyxl") 
-    two = pd.read_excel("https://docs.google.com/spreadsheets/d/1LPpYIcKNLfenpzSGTOuhhVgPIQ3q1B1F/export?format=xlsx", engine="openpyxl")
-    three = pd.read_excel("https://docs.google.com/spreadsheets/d/15kgM8W-6wzVYKX7ijqTAAQvD4ZViusvx/export?format=xlsx", engine="openpyxl") 
-    four = pd.read_excel("https://docs.google.com/spreadsheets/d/17-kcXyS6jTnRym4X5caCjch9YUEqC1w_/export?format=xlsx", engine="openpyxl")
+    # Read crime data
+    one = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2021.xls"), engine="xlrd")
+    two = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2022.xlsx"), engine="openpyxl")
+    three = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2023.xlsx"), engine="openpyxl")
+    four = pd.read_excel(os.path.join(DATA_DIR, "estadsticaspoliciales2024.xls"), engine="xlrd")
+
 
     # After reading the 4 datasets we normalize the 'Canton' and 'Distrito' columns to prep for merging
     one['Canton'] = normalize_column(one['Canton'])

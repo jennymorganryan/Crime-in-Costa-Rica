@@ -1,12 +1,22 @@
+import os
 import folium
 import branca
 import geopandas as gpd
 from folium.plugins import Search
-from application.build_processed_map_data import ensure_processed_file
+from application.build_processed_map_data import build_processed_file
+
+DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
+PROCESSED_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
+
+
+def ensure_processed_file_exists():
+    if not os.path.exists(PROCESSED_PATH):
+        build_processed_file()
+    return PROCESSED_PATH
 
 
 def get_map():
-    processed_path = ensure_processed_file()
+    processed_path = ensure_processed_file_exists()
     merged_popup = gpd.read_file(processed_path)
 
     costa_rica_coordinates = [9.7489, -83.7534]

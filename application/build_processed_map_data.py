@@ -2,7 +2,6 @@ import os
 import pandas as pd
 import geopandas as gpd
 import boto3
-from botocore.exceptions import ClientError
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 PROCESSED_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
@@ -52,47 +51,13 @@ def get_s3_client():
     )
 
 
-def bucket_has_processed_file():
-    if not bucket_enabled():
-        return False
-
-    s3 = get_s3_client()
-    bucket_name = os.environ["BUCKET"]
-
-    try:
-        s3.head_object(Bucket=bucket_name, Key=BUCKET_OBJECT_KEY)
-        return True
-    except ClientError:
-        return False
-    except Exception as e:
-        print(f"Bucket check failed: {e}")
-        return False
-
-
-def download_from_bucket():
-    if not bucket_enabled():
-        return False
-
-    s3 = get_s3_client()
-    bucket_name = os.environ["BUCKET"]
-
-    try:
-        os.makedirs(DATA_DIR, exist_ok=True)
-        s3.download_file(bucket_name, BUCKET_OBJECT_KEY, PROCESSED_PATH)
-        print(f"Downloaded {BUCKET_OBJECT_KEY} from bucket")
-        return True
-    except Exception as e:
-        print(f"Download skipped or failed: {e}")
-        return False
-
-
 def upload_to_bucket():
     if not bucket_enabled():
         print("Bucket variables not found. Skipping upload.")
         return
 
     if not os.path.exists(PROCESSED_PATH):
-        print("Processed file does not exist locally. Skipping upload.")
+        print("Processed file missing. Skipping upload.")
         return
 
     s3 = get_s3_client()
@@ -105,17 +70,6 @@ def upload_to_bucket():
         ExtraArgs={"ContentType": "application/geo+json"},
     )
     print(f"Uploaded {BUCKET_OBJECT_KEY} to bucket")
-
-
-def ensure_bucket_has_processed_file():
-    if not bucket_enabled():
-        return
-
-    if bucket_has_processed_file():
-        return
-
-    if os.path.exists(PROCESSED_PATH):
-        upload_to_bucket()
 
 
 def build_processed_file():
@@ -216,19 +170,3 @@ def build_processed_file():
 
     upload_to_bucket()
     return PROCESSED_PATH
-
-
-def ensure_processed_file():
-    if os.path.exists(PROCESSED_PATH):
-        ensure_bucket_has_processed_file()
-        return PROCESSED_PATH
-
-    downloaded = download_from_bucket()
-    if downloaded and os.path.exists(PROCESSED_PATH):
-        return PROCESSED_PATH
-
-    return build_processed_file()
-
-
-if __name__ == "__main__":
-    ensure_processed_file()

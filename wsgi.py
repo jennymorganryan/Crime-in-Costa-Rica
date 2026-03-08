@@ -4,7 +4,7 @@ from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
-def loading ():
+def loading():
     return render_template("loading_page.html")
 
 @app.route("/map")
@@ -14,5 +14,5 @@ def home():
     return render_template("index.html", map=map_html)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # dynamic port for Render
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

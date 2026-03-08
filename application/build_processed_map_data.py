@@ -21,10 +21,24 @@ def normalize_column(col):
 
 
 def bucket_enabled():
-    return all(
-        os.environ.get(name)
-        for name in ["BUCKET", "ACCESS_KEY_ID", "SECRET_ACCESS_KEY", "REGION", "ENDPOINT"]
-    )
+    bucket = os.environ.get("BUCKET")
+    access_key_id = os.environ.get("ACCESS_KEY_ID")
+    secret_access_key = os.environ.get("SECRET_ACCESS_KEY")
+    region = os.environ.get("REGION")
+    endpoint = os.environ.get("ENDPOINT")
+
+    if not bucket:
+        return False
+    if not access_key_id:
+        return False
+    if not secret_access_key:
+        return False
+    if not region:
+        return False
+    if not endpoint:
+        return False
+
+    return True
 
 
 def get_s3_client():
@@ -92,9 +106,17 @@ def build_processed_file():
         engine="xlrd",
     )
 
-    for df in [one, two, three, four]:
-        df["Canton"] = normalize_column(df["Canton"])
-        df["Distrito"] = normalize_column(df["Distrito"])
+    one["Canton"] = normalize_column(one["Canton"])
+    one["Distrito"] = normalize_column(one["Distrito"])
+
+    two["Canton"] = normalize_column(two["Canton"])
+    two["Distrito"] = normalize_column(two["Distrito"])
+
+    three["Canton"] = normalize_column(three["Canton"])
+    three["Distrito"] = normalize_column(three["Distrito"])
+
+    four["Canton"] = normalize_column(four["Canton"])
+    four["Distrito"] = normalize_column(four["Distrito"])
 
     polygon_districts["NOM_CANT"] = normalize_column(polygon_districts["NOM_CANT"])
     polygon_districts["NOM_DIST"] = normalize_column(polygon_districts["NOM_DIST"])
@@ -166,7 +188,8 @@ def ensure_processed_file():
     if os.path.exists(PROCESSED_PATH):
         return PROCESSED_PATH
 
-    if download_from_bucket() and os.path.exists(PROCESSED_PATH):
+    downloaded = download_from_bucket()
+    if downloaded and os.path.exists(PROCESSED_PATH):
         return PROCESSED_PATH
 
     return build_processed_file()

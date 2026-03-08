@@ -34,29 +34,6 @@ def get_s3_client():
         aws_secret_access_key=os.environ["SECRET_ACCESS_KEY"],
         region_name=os.environ["REGION"],
     )
-import os
-import boto3
-from application.build_processed_map_data import OUTPUT_PATH, DATA_DIR
-
-BUCKET_OBJECT_KEY = "processed_crime_map.geojson"
-
-
-def download_processed_file_from_bucket():
-    """Downloads the 'Source of Truth' from Railway Storage."""
-    if not bucket_vars_present():
-        return False
-
-    s3 = get_s3_client()
-    bucket_name = os.environ["BUCKET"]
-    
-    try:
-        os.makedirs(DATA_DIR, exist_ok=True)
-        s3.download_file(bucket_name, BUCKET_OBJECT_KEY, OUTPUT_PATH)
-        print(f"Successfully synced from bucket: {OUTPUT_PATH}")
-        return True
-    except Exception as e:
-        print(f"Bucket is empty or unreachable: {e}")
-        return False
 
 
 def upload_processed_file_to_bucket():

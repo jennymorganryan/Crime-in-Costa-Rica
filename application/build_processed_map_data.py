@@ -1,11 +1,9 @@
 import os
 import pandas as pd
 import geopandas as gpd
-import boto3
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
-PROCESSED_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
-BUCKET_OBJECT_KEY = "processed_crime_map.geojson"
+OUTPUT_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
 
 
 def normalize_column(col):
@@ -18,70 +16,6 @@ def normalize_column(col):
         .str.replace(r"\s+", " ", regex=True)
         .str.replace(r"[^\w\s]", "", regex=True)
     )
-
-
-def bucket_enabled():
-    bucket = os.environ.get("BUCKET")
-    access_key_id = os.environ.get("ACCESS_KEY_ID")
-    secret_access_key = os.environ.get("SECRET_ACCESS_KEY")
-    region = os.environ.get("REGION")
-    endpoint = os.environ.get("ENDPOINT")
-
-    if not bucket:
-        return False
-    if not access_key_id:
-        return False
-    if not secret_access_key:
-        return False
-    if not region:
-        return False
-    if not endpoint:
-        return False
-
-    return True
-
-
-def get_s3_client():
-    return boto3.client(
-        "s3",
-        endpoint_url=os.environ["ENDPOINT"],
-        aws_access_key_id=os.environ["ACCESS_KEY_ID"],
-        aws_secret_access_key=os.environ["SECRET_ACCESS_KEY"],
-        region_name=os.environ["REGION"],
-    )
-
-
-def download_from_bucket():
-    if not bucket_enabled():
-        return False
-
-    s3 = get_s3_client()
-    bucket_name = os.environ["BUCKET"]
-
-    try:
-        os.makedirs(DATA_DIR, exist_ok=True)
-        s3.download_file(bucket_name, BUCKET_OBJECT_KEY, PROCESSED_PATH)
-        print(f"Downloaded {BUCKET_OBJECT_KEY} from bucket")
-        return True
-    except Exception as e:
-        print(f"Download skipped or failed: {e}")
-        return False
-
-
-def upload_to_bucket():
-    if not bucket_enabled():
-        return
-
-    s3 = get_s3_client()
-    bucket_name = os.environ["BUCKET"]
-
-    s3.upload_file(
-        PROCESSED_PATH,
-        bucket_name,
-        BUCKET_OBJECT_KEY,
-        ExtraArgs={"ContentType": "application/geo+json"},
-    )
-    print(f"Uploaded {BUCKET_OBJECT_KEY} to bucket")
 
 
 def build_processed_file():
@@ -177,23 +111,18 @@ def build_processed_file():
     merged = merged.to_crs(4326)
 
     os.makedirs(DATA_DIR, exist_ok=True)
-    merged.to_file(PROCESSED_PATH, driver="GeoJSON")
-    print(f"Saved processed file to {PROCESSED_PATH}")
+    merged.to_file(OUTPUT_PATH, driver="GeoJSON")
+    print(f"Saved processed file to {OUTPUT_PATH}")
 
-    upload_to_bucket()
-    return PROCESSED_PATH
+    return OUTPUT_PATH
 
 
 def ensure_processed_file():
-    if os.path.exists(PROCESSED_PATH):
-        return PROCESSED_PATH
-
-    downloaded = download_from_bucket()
-    if downloaded and os.path.exists(PROCESSED_PATH):
-        return PROCESSED_PATH
+    if os.path.exists(OUTPUT_PATH):
+        return OUTPUT_PATH
 
     return build_processed_file()
 
 
 if __name__ == "__main__":
-    ensure_processed_file()
+    build_processed_file()

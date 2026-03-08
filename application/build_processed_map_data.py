@@ -4,7 +4,7 @@ import geopandas as gpd
 import boto3
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
-PROCESSED_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
+OUTPUT_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
 BUCKET_OBJECT_KEY = "processed_crime_map.geojson"
 
 
@@ -20,7 +20,7 @@ def normalize_column(col):
     )
 
 
-def bucket_enabled():
+def bucket_vars_present():
     bucket = os.environ.get("BUCKET")
     access_key_id = os.environ.get("ACCESS_KEY_ID")
     secret_access_key = os.environ.get("SECRET_ACCESS_KEY")
@@ -51,25 +51,21 @@ def get_s3_client():
     )
 
 
-def upload_to_bucket():
-    if not bucket_enabled():
+def upload_to_bucket(file_path):
+    if not bucket_vars_present():
         print("Bucket variables not found. Skipping upload.")
-        return
-
-    if not os.path.exists(PROCESSED_PATH):
-        print("Processed file missing. Skipping upload.")
         return
 
     s3 = get_s3_client()
     bucket_name = os.environ["BUCKET"]
 
     s3.upload_file(
-        PROCESSED_PATH,
+        file_path,
         bucket_name,
         BUCKET_OBJECT_KEY,
         ExtraArgs={"ContentType": "application/geo+json"},
     )
-    print(f"Uploaded {BUCKET_OBJECT_KEY} to bucket")
+
 
 
 def build_processed_file():
@@ -94,17 +90,9 @@ def build_processed_file():
         engine="xlrd",
     )
 
-    one["Canton"] = normalize_column(one["Canton"])
-    one["Distrito"] = normalize_column(one["Distrito"])
-
-    two["Canton"] = normalize_column(two["Canton"])
-    two["Distrito"] = normalize_column(two["Distrito"])
-
-    three["Canton"] = normalize_column(three["Canton"])
-    three["Distrito"] = normalize_column(three["Distrito"])
-
-    four["Canton"] = normalize_column(four["Canton"])
-    four["Distrito"] = normalize_column(four["Distrito"])
+    for df in [one, two, three, four]:
+        df["Canton"] = normalize_column(df["Canton"])
+        df["Distrito"] = normalize_column(df["Distrito"])
 
     polygon_districts["NOM_CANT"] = normalize_column(polygon_districts["NOM_CANT"])
     polygon_districts["NOM_DIST"] = normalize_column(polygon_districts["NOM_DIST"])
@@ -165,8 +153,11 @@ def build_processed_file():
     merged = merged.to_crs(4326)
 
     os.makedirs(DATA_DIR, exist_ok=True)
-    merged.to_file(PROCESSED_PATH, driver="GeoJSON")
-    print(f"Saved processed file to {PROCESSED_PATH}")
+    merged.to_file(OUTPUT_PATH, driver="GeoJSON")
+    print(f"Saved processed file to {OUTPUT_PATH}")
 
-    upload_to_bucket()
-    return PROCESSED_PATH
+    upload_to_bucket(OUTPUT_PATH)
+
+
+if __name__ == "__main__":
+    build_processed_file()

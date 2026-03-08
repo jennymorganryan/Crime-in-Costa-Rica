@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import geopandas as gpd
+from application.sync_bucket import download_processed_file_from_bucket, upload_processed_file_to_bucket
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 OUTPUT_PATH = os.path.join(DATA_DIR, "processed_crime_map.geojson")
@@ -118,10 +119,25 @@ def build_processed_file():
 
 
 def ensure_processed_file():
+    #check if it exists locally (Fastest)
     if os.path.exists(OUTPUT_PATH):
         return OUTPUT_PATH
 
-    return build_processed_file()
+    #try to sync from the Bucket (Single Source of Truth)
+    print("File not found locally. Attempting to sync from Railway Bucket...")
+    if download_processed_file_from_bucket():
+        return OUTPUT_PATH
+
+    #if no bucket data exists, build it and then save to bucket
+    print("No data in bucket. Generating new processed file...")
+    path = build_processed_file()
+    
+    try:
+        upload_processed_file_to_bucket()
+    except Exception as e:
+        print(f"Could not upload new file to bucket: {e}")
+        
+    return path
 
 
 if __name__ == "__main__":

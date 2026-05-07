@@ -28,7 +28,7 @@ def get_map():
             if x["properties"]["Crimen total desde 2021"] is not None
             else "gray",
             "color": "black",
-            "weight": 0.5,
+            "weight": 0.8,
             "fillOpacity": 0.4,
         }
     ).add_to(m)

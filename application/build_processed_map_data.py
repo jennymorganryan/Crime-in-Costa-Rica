@@ -107,7 +107,7 @@ def build_processed_file():
     merged[numeric_cols] = merged[numeric_cols].fillna(0)
 
     merged = merged.to_crs(3857)
-    merged["geometry"] = merged["geometry"].simplify(200, preserve_topology=True)
+    merged["geometry"] = merged["geometry"].simplify(25, preserve_topology=True)
     merged = merged.to_crs(4326)
 
     os.makedirs(DATA_DIR, exist_ok=True)
